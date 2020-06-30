@@ -43,7 +43,11 @@ Run it without arguments to test it; it will run in dry-run mode, without actual
 sudo ./docker-firewall
 ```
 
+Install in the usual location:
 
+```bash
+sudo install -m 0755 docker-firewall /usr/sbin/docker-firewall
+```
 
 ### netfilter-persistent
 
