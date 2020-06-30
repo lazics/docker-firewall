@@ -16,7 +16,6 @@ set -e
 PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:$PATH"
 NAME=docker-firewall
 DESC=docker-firewall
-HOMEDIR="/home/lazics/projects/infocus/alfred/docker/data/host-utils/${NAME}"
 DAEMON="/usr/sbin/${NAME}"
 DEFAULTS="/etc/default/${NAME}"
 USER=root
@@ -32,7 +31,7 @@ fi
 case "$1" in
 	start)
 		log_daemon_msg "Starting $DESC"
-		start-stop-daemon --start --quiet -d "$HOMEDIR" --make-pidfile --pidfile "$PIDFILE" --exec "$DAEMON" --background -- --monitor --execute
+		start-stop-daemon --start --quiet --make-pidfile --pidfile "$PIDFILE" --exec "$DAEMON" --background -- --monitor --execute
 		log_end_msg $?
 	;;
 	stop)

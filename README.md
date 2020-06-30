@@ -56,8 +56,8 @@ There is a plugin for *netfilter-persistent*, it should be copied/symlinked to t
 For example on Ubuntu:
 
 ```bash
-sudo cp "./netfilter-persistent/netfilter-persistent--docker-firewall" "/usr/share/netfilter-persistent/plugins.d/10-docker-firewall"
-sudo cp "./netfilter-persistent/netfilter-persistent--docker-firewall" "/usr/share/netfilter-persistent/plugins.d/90-docker-firewall"
+sudo install -m 0755 "./netfilter-persistent/netfilter-persistent--docker-firewall" "/usr/share/netfilter-persistent/plugins.d/10-docker-firewall"
+sudo install -m 0755 "./netfilter-persistent/netfilter-persistent--docker-firewall" "/usr/share/netfilter-persistent/plugins.d/90-docker-firewall"
 ```
 
 You can now restart netfilter-persistent, to apply the docker rules together with your own rules.
@@ -86,7 +86,7 @@ sudo systemctl start docker-firewall.service
 This method is only used in case systemd is not available or simply not preferred.
 
 ```bash
-sudo ln -s "/home/lazics/projects/infocus/alfred/docker/data/host-utils/docker-firewall/docker-firewall--rc.sh" "/etc/init.d/docker-firewall"
+sudo install -m 0755 "./sysv-rc/docker-firewall" "/etc/init.d/docker-firewall"
 sudo update-rc.d docker-firewall defaults
 sudo service docker-firewall start
 ```
