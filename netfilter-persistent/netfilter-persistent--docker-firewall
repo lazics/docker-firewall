@@ -1,0 +1,61 @@
+#!/bin/bash
+
+set -e
+
+BN=$( basename "$0" )
+DOCKER_FIREWALL="/usr/sbin/docker-firewall"
+
+load_rules()
+{
+	if [ "${BN:0:3}" = "90-" ] || [ "$BN" = "netfilter-persistent--docker" ]; then
+		"${DOCKER_FIREWALL}" -e
+	fi
+}
+
+save_rules()
+{
+	# flush the dynamic rules, so the saved rules file doesn't contain them
+	if [ "${BN:0:3}" = "10-" ] || [ "$BN" = "netfilter-persistent--docker" ]; then
+		"${DOCKER_FIREWALL}" -e -f -u
+	fi
+
+	# restore after the save
+	if [ "${BN:0:3}" = "90-" ] || [ "$BN" = "netfilter-persistent--docker" ]; then
+		"${DOCKER_FIREWALL}" -e -u
+	fi
+}
+
+flush_rules()
+{
+	if [ "${BN:0:3}" = "10-" ] || [ "$BN" = "netfilter-persistent--docker" ]; then
+		"${DOCKER_FIREWALL}" -e -f
+	fi
+}
+
+if [ ! -x "DOCKER_FIREWALL" ]; then
+	exit 0
+fi
+
+case "$1" in
+	start|restart|reload|force-reload)
+		load_rules
+		;;
+	save)
+		save_rules
+		;;
+	stop)
+		# Why? because if stop is used, the firewall gets flushed for a variable
+		# amount of time during package upgrades, leaving the machine vulnerable
+		# It's also not always desirable to flush during purge
+		echo "Automatic flushing disabled, use \"flush\" instead of \"stop\""
+		;;
+	flush)
+		flush_rules
+		;;
+	*)
+		echo "Usage: $0 {start|restart|reload|force-reload|save|flush}" >&2
+		exit 1
+		;;
+esac
+
+exit $rc

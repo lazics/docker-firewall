@@ -1,0 +1,12 @@
+[Unit]
+Description=Docker Firewall Manager
+
+[Service]
+Type=simple
+User=root
+ExecStart="/usr/sbin/docker-firewall" --monitor --execute
+TimeoutStopSec=10
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
