@@ -1,0 +1,54 @@
+#!/bin/bash
+#
+### BEGIN INIT INFO
+# Provides:          docker-firewall
+# Required-Start:    $syslog $network $local_fs $time
+# Required-Stop:     $syslog $network $local_fs
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# X-Start-Before:    docker
+# Short-Description: Start the Docker Firewall Manager
+# Description:       Start the Docker Firewall Manager
+### END INIT INFO
+
+set -e
+
+PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin:$PATH"
+NAME=docker-firewall
+DESC=docker-firewall
+HOMEDIR="/home/lazics/projects/infocus/alfred/docker/data/host-utils/${NAME}"
+DAEMON="/usr/sbin/${NAME}"
+DEFAULTS="/etc/default/${NAME}"
+USER=root
+PIDFILE="/var/run/${NAME}.pid"
+
+[ -e "/lib/lsb/init-functions" ] && . /lib/lsb/init-functions
+
+# Load startup options if available
+if [ -f $DEFAULTS ]; then
+	. $DEFAULTS || true
+fi
+
+case "$1" in
+	start)
+		log_daemon_msg "Starting $DESC"
+		start-stop-daemon --start --quiet -d "$HOMEDIR" --make-pidfile --pidfile "$PIDFILE" --exec "$DAEMON" --background -- --monitor --execute
+		log_end_msg $?
+	;;
+	stop)
+		log_daemon_msg "Stopping $DESC"
+		start-stop-daemon --oknodo --stop --exec "$DAEMON" --pidfile "$PIDFILE"
+		log_end_msg $?
+	;;
+	restart)
+		$0 stop
+		sleep 1
+		$0 start
+	;;
+	status)
+		status_of_proc -p "$PIDFILE" "$DAEMON" "$NAME"
+	;;
+	*)
+		echo "Usage: $0 <start|stop|restart|status>"; exit 1
+	;;
+esac
