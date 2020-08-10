@@ -17,7 +17,7 @@ func (dockerFirewall *DockerFirewall) Generate() error {
 
 		dockerFirewall.appendRule(
 			"nat", dockerFirewall.chainPrerouting,
-			fmt.Sprintf("-j %s",
+			fmt.Sprintf("-m addrtype --dst-type LOCAL -j %s",
 				dockerFirewall.ChainDockerDNAT,
 			),
 			rootRuleOptions,
@@ -25,7 +25,7 @@ func (dockerFirewall *DockerFirewall) Generate() error {
 
 		dockerFirewall.appendRule(
 			"nat", dockerFirewall.chainOutput,
-			fmt.Sprintf("-j %s",
+			fmt.Sprintf("! -d 127.0.0.0/8 -m addrtype --dst-type LOCAL -j %s",
 				dockerFirewall.ChainDockerDNAT,
 			),
 			rootRuleOptions,
@@ -122,10 +122,16 @@ func (dockerFirewall *DockerFirewall) Generate() error {
 				if network, ok := dockerFirewall.NetworksByID[containerNetwork.NetworkID]; ok {
 					if network.IsIPv4NAT {
 						for _, port := range container.Ports {
+							dstIP := ""
+							if port.IP != "0.0.0.0" {
+								dstIP = "-d " + port.IP
+							}
+
 							dockerFirewall.appendRule(
 								"nat", dockerFirewall.ChainDockerDNAT,
-								fmt.Sprintf("! -i %s -p %s -m %s --dport %d -j DNAT --to-destination %s:%d",
+								fmt.Sprintf("! -i %s %s -p %s -m %s --dport %d -j DNAT --to-destination %s:%d",
 									network.InterfaceName,
+									dstIP,
 									port.Type,
 									port.Type,
 									port.PublicPort,
